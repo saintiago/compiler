@@ -1,0 +1,23 @@
+{
+  "name": "compiler",
+  "version": "1.0.0",
+  "description": "Compilers practice course (https://github.com/ps-group/compilers-course-2018)",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx jest --no-cache"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saintiago/compiler.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/saintiago/compiler/issues"
+  },
+  "homepage": "https://github.com/saintiago/compiler#readme",
+  "devDependencies": {
+    "jest": "^23.6.0"
+  }
+}
