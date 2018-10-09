@@ -17,9 +17,14 @@ class CalcLexer {
         /** @private {number} */
         this.position = 0;
         /** @private {RegExp} */
-        this.numberPartPattern = /^(\d|\.)$/;
+        this.numberPattern = /^(\d|\.)+$/;
         /** @private {RegExp} */
-        this.spacePartPattern = /^\s$/;
+        this.idPattern = /^([_a-zA-Z0-9])+$/;
+        /** @private {RegExp} */
+        this.spacePattern = /^\s$/;
+        /** @private {RegExp} */
+        this.wordPartPattern = /^([^\+\-\*\/=\s])$/;
+
     }
 
     /**
@@ -31,59 +36,68 @@ class CalcLexer {
             this._skipSpaces();
 
             if (this._sourceEndReached()) {
-                return createToken(TokenType.TT_END);
+                return createToken(TokenType.END);
             }
 
             const char = this.source[this.position];
     
-            if (this._isNumberPart(char)) {
-                return this._readNumber();
+            if (this._isWordPart(char)) {
+                return this._readWord();
             }
 
             this.position++;
 
             switch (char) {
                 case '+':
-                    return createToken(TokenType.TT_PLUS);
+                    return createToken(TokenType.PLUS);
                 case '-':
-                    return createToken(TokenType.TT_MINUS);
+                    return createToken(TokenType.MINUS);
                 case '*':
-                    return createToken(TokenType.TT_MUL);
+                    return createToken(TokenType.MUL);
                 case '/':
-                    return createToken(TokenType.TT_DIV);
+                    return createToken(TokenType.DIV);
+                case '=':
+                    return createToken(TokenType.EQUALS);
             }
 
-            return createToken(TokenType.TT_ERROR);
+            return createToken(TokenType.ERROR, char);
         } catch (e) {
             if (e instanceof TokenError) {
-                return createToken(TokenType.TT_ERROR);
+                return createToken(TokenType.ERROR, e.tokenValue);
             }    
             throw e;            
         }
     }
 
+    /** @private */
     _skipSpaces() {
         while (this._isSpace(this.source[this.position])) {
             this.position++;
         }
     }
 
-    /** 
-     * @private 
+    /**
+     * @throws {TokenError}
+     * @return {Token}
      */
-    _readNumber() {
-        return createToken(TokenType.TT_NUMBER, this._readNumberValue());
+    _readWord() {
+        const word = this._readWordValue();
+
+        if (this._validateNumber(word)) {
+            return createToken(TokenType.NUMBER, word);
+        }
+
+        if (this._validateId(word)) {
+            return createToken(TokenType.ID, word);
+        }
+
+        throw new TokenError("Parse error", word);
     }
 
-    /**
-     * @private
-     * @return {string}
-     * @throws {TokenError}
-     */
-    _readNumberValue() {
+    _readWordValue() {
         let value = '';
         let char = this.source[this.position];
-        while ((this._isNumberPart(char) || this._isFractionalDivisor(char)) && !this._sourceEndReached()) {
+        while (this._isWordPart(char) && !this._sourceEndReached()) {
             value += char;
             this.position++;
             if (this.source[this.position] === undefined) {
@@ -91,25 +105,44 @@ class CalcLexer {
             }
             char = this.source[this.position];
         }
-        this._validateNumber(value);
         return value;
     }
 
     /**
      * @private
      * @param {string} number
-     * @throws {TokenError}
      */
     _validateNumber(number) {
+        // Consist of allowed characters
+        if (!this.numberPattern.test(number)) {
+            return false;
+        }
+
         // Number can start with 0 only if second char is fractional divisor 
-        if (!number.length || number.length > 1 && number[0] === '0' && number[1] !== FRACTIONAL_DIVISOR) {
-            throw new TokenError();
+        if (number.length > 1 && number[0] === '0' && number[1] !== FRACTIONAL_DIVISOR) {
+            return false;
         }
 
         // Fractional divisor must be between digits
         if (number[0] === FRACTIONAL_DIVISOR || number[number.length - 1] === FRACTIONAL_DIVISOR) {
-            throw new TokenError();
+            return false;
         }
+
+        return true;
+    }
+
+    _validateId(id) {
+        // Consist of allowed characters
+        if (!this.idPattern.test(id)) {
+            return false;
+        }
+
+        // Starts with non-digit character
+        if (this.numberPattern.test(id[0])) {
+            return false;
+        }
+
+        return true;
     }
 
     _sourceEndReached() {
@@ -121,22 +154,15 @@ class CalcLexer {
      * @private 
      */
     _isSpace(char) {
-        return this.spacePartPattern.test(char);
+        return this.spacePattern.test(char);
     }
 
-    /**
+        /**
      * @param {string} char 
      * @private 
      */
-    _isNumberPart(char) {
-        return this.numberPartPattern.test(char);
-    }
-
-    /**
-     * @param {string} char 
-     */
-    _isFractionalDivisor(char) {
-        return char === FRACTIONAL_DIVISOR;
+    _isWordPart(char) {
+        return this.wordPartPattern.test(char);
     }
 }
 

@@ -1,12 +1,13 @@
 const TokenType = {
-    TT_END: 0,
-	TT_ERROR: 1,
-	TT_NUMBER: 2,
-    TT_PLUS: 3,
-    TT_MINUS: 4,
-    TT_MUL: 5,
-    TT_DIV: 6
-	// TODO: add other tokens here.
+    END: 0,
+	ERROR: 1,
+    NUMBER: 2,
+    ID: 3,
+    PLUS: 4,
+    MINUS: 5,
+    MUL: 6,
+    DIV: 7,
+    EQUALS: 8
 };
 
 /**
