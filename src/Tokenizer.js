@@ -38,7 +38,7 @@ function readToken (word) {
             case '/':
                 return createToken(TokenType.DIV);
             case '=':
-                return createToken(TokenType.EQUALS);
+                return createToken(TokenType.ASSIGN);
             default:
                 return toToken(word);    
         }

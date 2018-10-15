@@ -7,7 +7,8 @@ const TokenType = {
     MINUS: 5,
     MUL: 6,
     DIV: 7,
-    EQUALS: 8
+    ASSIGN: 8,
+    STMT_END: 9
 };
 
 /**

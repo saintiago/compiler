@@ -58,14 +58,15 @@ describe('Calculator lexer', () => {
     });
 
     it('Can read expression', async () => {
-        expect(await tokenize('y=0+1/887')).toEqual([
+        expect(await tokenize('y=0+1/887;')).toEqual([
             createToken(TokenType.ID, 'y'),
-            createToken(TokenType.EQUALS),
+            createToken(TokenType.ASSIGN),
             createToken(TokenType.NUMBER, '0'),
             createToken(TokenType.PLUS),
             createToken(TokenType.NUMBER, '1'),
             createToken(TokenType.DIV),
             createToken(TokenType.NUMBER, '887'),
+            createToken(TokenType.EXPR_END),
             createToken(TokenType.END)
         ]);
     });
